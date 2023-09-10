@@ -1,43 +1,39 @@
 #!/usr/bin/env bash
 
+# Purpose: Quickly edit a file that needs sudo access to change using notepadqq.
+
 # Debugging
-# set -x 
+# set -x
 
 # Check if file path argument is provided
-if [ -z "$1" ]; then  
-  echo "Please provide a file path as an argument." 
-  exit 1  
-fi  
- 
+if [ -z "$1" ]; then
+  echo "Please provide a file path as an argument."
+  exit 1
+fi
+
 # Extract file name and path
-file_path="$1"  
+file_path="$1"
 file_name=$(basename "$file_path")
-file_dir=$(dirname "$file_path")  
- 
-# Create temp file name  
+file_dir=$(dirname "$file_path")
+
+# Create temp file name
 temp_file_name=".$(date +%s).$file_name"
 temp_file_path="/tmp/$temp_file_name"
- 
+
 # Copy file to temp location
-cp "$file_path" "$temp_file_path" 
- 
-# Open file in notepadqq 
+cp "$file_path" "$temp_file_path"
+
+# Open file in notepadqq
 notepadqq "$temp_file_path" &
 
 # Instructions for the user
 echo Waiting for file to be changed. Press Ctrl-C to abort.
- 
-# Wait for the temp file to change 
+
+# Wait for the temp file to change
 while cmp -s "$temp_file_path" "$file_path"; do
-  sleep 1 
+  sleep 1
 done
- 
-# Check if file was changed
-if cmp -s "$temp_file_path" "$file_path"; then
-  echo "File was not changed." 
-  exit 0  
-fi  
- 
+
 # Create backup file name with timestamp
 backup_file_name=".$(date +%Y%m%d%H%M%S).$file_name"
 backup_file_path="$file_dir/$backup_file_name"
