@@ -2,6 +2,8 @@
 
 # Purpose: Quickly edit a file that needs sudo access to change using notepadqq.
 
+# TO DO: Add prompt to create the file if it doesn't exist.
+
 # Debugging
 # set -x
 
