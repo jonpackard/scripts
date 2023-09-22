@@ -10,11 +10,26 @@
 
 wol_ip="10.84.1.54"
 wol_mac="18:66:DA:4B:AD:1B"
+target_port="3389"
 log_path="${HOME}/logs"
 log_name="wol-workpc.log"
 
 mkdir -p "${log_path}"
 printf "\n$(date)" >> "${log_path}/${log_name}"
-printf "\n** Sending WOL Magic Packet **\n" | tee -a "${log_path}/${log_name}"
-/usr/bin/env wol -vi "${wol_ip}" "${wol_mac}" 2>&1 | tee -a "${log_path}/${log_name}"
-printf "** Command executed. Logs stored in \"${log_path}/${log_name}\". **\n"
+
+while true; do
+    # Run the nmap command and capture its output
+    nmap_output=$(nmap -Pn -p $target_port $wol_ip)
+
+    # Check if the output contains the word "open"
+    if [[ $nmap_output =~ "open" ]]; then
+        printf "\n** Port $target_port on $wol_ip is open. **\n" | tee -a "${log_path}/${log_name}"
+        break  # Exit the loop if the port is open
+    else
+        printf "\n** Port $target_port on $wol_ip is not open yet. Trying again... ***\n" | tee -a "${log_path}/${log_name}"
+        sleep 1  # Wait for 1 second before the next iteration
+	printf "\n** Sending WOL Magic Packet **\n" | tee -a "${log_path}/${log_name}"
+	/usr/bin/env wol -vi "${wol_ip}" "${wol_mac}" 2>&1 | tee -a "${log_path}/${log_name}"
+	printf "** Command executed. Logs stored in \"${log_path}/${log_name}\". **\n"
+    fi
+done
